@@ -1,0 +1,29 @@
+# this isn't enough
+# also, the device panics on abort
+# for use with ipwndfu, currently
+
+import dfu
+import usbexec
+import sys
+import usb.core
+
+t8004_patches = {
+    0x40003df6: "\x01\x00\xb0\xe3", # mov r0, #1
+    0x40003e1a: "\x00\xf0\x20\xe3", # nop
+    0x40003e1e: "\x00\xf0\x20\xe3", # nop
+    0x40003e22: "\x00\xf0\x20\xe3", # nop
+    0x40003e24: "\x00\xf0\x20\xe3", # nop
+    0x40003e28: "\x00\xf0\x20\xe3", # nop
+    0x40003e28: "\x00\xf0\x20\xe3", # nop
+    0x40003e2c: "\x00\xf0\x20\xe3", # nop
+}
+
+idevice = dfu.acquire_device()
+device = usbexec.PwnedUSBDevice()
+for i in t8004_patches:
+    device.write_memory(i, t8004_patches[i])
+    
+# This causees the device to panic
+# idevice.ctrl_transfer(0x21, 4, 0, 0, 0, 0)
+dfu.usb_reset(idevice)
+dfu.release_device(idevice)
